@@ -1,5 +1,7 @@
 package com.example.demo.service.impl;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Collection;
 import java.util.List;
 
@@ -11,6 +13,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import com.example.demo.MainProjectInfo;
 import com.example.demo.domain.inventory.Product;
@@ -59,7 +62,9 @@ public class ProductService implements IProductService{
 		
 		final String url = new StringBuilder().append(MainProjectInfo.BASE_URL).append(PRODUCTS).append(PRODUCTS_GET_ALL).toString();
 		
-		ResponseEntity<ProductResponse> productResponse = restTemplate.exchange(url, HttpMethod.GET, jwtEntity, ProductResponse.class);
+		UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromHttpUrl(url).queryParam("fromDate", getCurrentTime());
+		
+		ResponseEntity<ProductResponse> productResponse = restTemplate.exchange(uriBuilder.toUriString(), HttpMethod.GET, jwtEntity, ProductResponse.class);
 		
 		System.out.println(productResponse.getBody());
 		
@@ -74,5 +79,11 @@ public class ProductService implements IProductService{
 		headers.add("Authorization", "Bearer ".concat(token));		
 		
 		return headers;
+	}
+	
+	private String getCurrentTime() {
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("ddMMyyyyHH");
+		
+		return LocalDateTime.now().format(formatter);
 	}
 }
